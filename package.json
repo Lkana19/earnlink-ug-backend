@@ -1,0 +1,14 @@
+{
+  "name": "earnlink-ug-backend",
+  "version": "1.0.0",
+  "description": "Payment backend for EarnLink UG — handles Pesapal payments and confirmation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5"
+  }
+}
