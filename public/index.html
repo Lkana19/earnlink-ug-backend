@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EarnLink UG</title>
+<style>
+  :root {
+    --accent: #185FA5; --accent-bg: #E6F1FB; --accent-dark: #042C53;
+    --danger: #A32D2D;
+    --surface-0: #F1EFE8; --surface-1: #FFFFFF; --border: rgba(0,0,0,0.1);
+    --text-primary: #1A1A18; --text-secondary: #5F5E5A; --text-muted: #888780;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --accent: #85B7EB; --accent-bg: #0C447C; --accent-dark: #E6F1FB;
+      --surface-0: #1A1A18; --surface-1: #2C2C2A; --border: rgba(255,255,255,0.12);
+      --text-primary: #F1EFE8; --text-secondary: #B4B2A9; --text-muted: #888780;
+    }
+  }
+  :root[data-theme="dark"] {
+    --accent: #85B7EB; --accent-bg: #0C447C; --accent-dark: #E6F1FB;
+    --surface-0: #1A1A18; --surface-1: #2C2C2A; --border: rgba(255,255,255,0.12);
+    --text-primary: #F1EFE8; --text-secondary: #B4B2A9; --text-muted: #888780;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--surface-0); color: var(--text-primary);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    max-width: 480px; margin: 0 auto;
+  }
+  header { padding: 20px 16px 8px; }
+  header h1 { font-size: 20px; margin: 0; font-weight: 600; }
+  header p { font-size: 13px; color: var(--text-secondary); margin: 2px 0 0; }
+  main { padding: 8px 16px 90px; }
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .label { font-size: 12px; color: var(--text-secondary); margin: 0; }
+  .big { font-size: 22px; font-weight: 600; margin: 4px 0 0; }
+  .prod-name { font-weight: 600; font-size: 15px; margin: 0 0 2px; }
+  .prod-meta { font-size: 12px; color: var(--text-secondary); margin: 0; }
+  button { font-family: inherit; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-1); color: var(--text-primary); padding: 10px; font-size: 14px; cursor: pointer; width: 100%; }
+  button.primary { background: var(--accent); color: white; border: none; }
+  button.small { width: auto; padding: 6px 10px; font-size: 12px; }
+  input, textarea { width: 100%; font-family: inherit; font-size: 14px; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-0); color: var(--text-primary); margin-bottom: 8px; }
+  label.f { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+  .linkbox { font-size: 12px; color: var(--accent); word-break: break-all; background: var(--surface-0); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+  nav { position: sticky; bottom: 0; display: flex; background: var(--surface-1); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  nav button { flex: 1; border: none; border-radius: 0; background: none; padding: 10px 4px 8px; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--text-secondary); }
+  nav button.active { color: var(--accent); }
+  .icon { font-size: 18px; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+  .empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px 0; }
+  .rowbtn { display: flex; gap: 6px; margin-top: 8px; }
+  .err { color: var(--danger); font-size: 12px; margin: -4px 0 8px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="appTitle">EarnLink UG</h1>
+  <p>refer products, earn commission, cash out to mobile money</p>
+</header>
+
+<main>
+
+  <div class="tab active" id="tab-home">
+    <div class="grid2">
+      <div class="card"><p class="label">wallet balance</p><p class="big" id="homeBalance">0 UGX</p></div>
+      <div class="card"><p class="label">people referred</p><p class="big" id="homeReferrals">0</p></div>
+    </div>
+    <div class="card">
+      <p class="label" style="margin-bottom:8px;">your referral link</p>
+      <div class="linkbox" id="homeLink">app.link/ref/you</div>
+      <button onclick="copyLink()">copy link</button>
+    </div>
+    <div class="card">
+      <p class="label" style="margin-bottom:8px;">recent activity</p>
+      <div id="homeActivity" class="empty">no activity yet — share your link to get started</div>
+    </div>
+  </div>
+
+  <div class="tab" id="tab-products">
+    <div id="productList"></div>
+  </div>
+
+  <div class="tab" id="tab-wallet">
+    <div class="card">
+      <p class="label">available to withdraw</p>
+      <p class="big" id="walletBalance">0 UGX</p>
+    </div>
+    <div class="card">
+      <label class="f">withdraw to (MTN/Airtel number)</label>
+      <input id="momoNumber" placeholder="e.g. 0771 234 567">
+      <button class="primary" onclick="withdraw()">withdraw to mobile money</button>
+      <p class="label" style="margin-top:8px;">minimum withdrawal: 20,000 UGX (demo only — no real money moves here)</p>
+    </div>
+  </div>
+
+  <div class="tab" id="tab-admin">
+    <div class="card">
+      <p class="label" style="margin-bottom:8px; font-weight:600; color:var(--text-primary);">add a product</p>
+      <label class="f">product name</label>
+      <input id="pName" placeholder="e.g. business ideas guide">
+      <label class="f">price (UGX)</label>
+      <input id="pPrice" type="number" placeholder="15000">
+      <label class="f">commission %</label>
+      <input id="pCommission" type="number" placeholder="40">
+      <label class="f">short description</label>
+      <textarea id="pDesc" rows="2" placeholder="what the buyer gets"></textarea>
+      <label class="f">download link (Google Drive, Dropbox, etc.)</label>
+      <input id="pLink" placeholder="https://drive.google.com/...">
+      <p class="err" id="pError" style="display:none;"></p>
+      <button class="primary" onclick="addProduct()">add product</button>
+    </div>
+    <div class="card">
+      <p class="label" style="margin-bottom:8px; font-weight:600; color:var(--text-primary);">manage products</p>
+      <div id="adminList"></div>
+    </div>
+  </div>
+
+</main>
+
+<nav>
+  <button class="navbtn active" data-tab="home" onclick="showTab('home')"><span class="icon"><i class="ti ti-home" aria-hidden="true"></i></span>home</button>
+  <button class="navbtn" data-tab="products" onclick="showTab('products')"><span class="icon"><i class="ti ti-shopping-bag" aria-hidden="true"></i></span>products</button>
+  <button class="navbtn" data-tab="wallet" onclick="showTab('wallet')"><span class="icon"><i class="ti ti-wallet" aria-hidden="true"></i></span>wallet</button>
+  <button class="navbtn" data-tab="admin" onclick="showTab('admin')"><span class="icon"><i class="ti ti-settings" aria-hidden="true"></i></span>admin</button>
+</nav>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<script>
+let db = null;
+let products = [];
+let balance = 45000; // demo starting balance
+let referrals = 12;
+
+function fmt(n) { return Number(n).toLocaleString() + ' UGX'; }
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+}
+
+function copyLink() {
+  const text = document.getElementById('homeLink').textContent;
+  navigator.clipboard?.writeText(text).catch(() => {});
+}
+
+function withdraw() {
+  const num = document.getElementById('momoNumber').value.trim();
+  if (!num) { alert('enter a mobile money number first'); return; }
+  alert('demo only: in the real app this would send ' + fmt(balance) + ' to ' + num + ' via MTN/Airtel');
+}
+
+function renderProducts() {
+  const list = document.getElementById('productList');
+  const adminList = document.getElementById('adminList');
+  if (products.length === 0) {
+    list.innerHTML = '<div class="empty">no products yet — add one from the admin tab</div>';
+    adminList.innerHTML = '<div class="empty">no products yet</div>';
+    return;
+  }
+  list.innerHTML = products.map(p => `
+    <div class="card" id="prodcard-${p.id}">
+      <p class="prod-name">${escapeHtml(p.name)}</p>
+      <p class="prod-meta">${fmt(p.price)} &middot; ${p.commission}% commission</p>
+      ${p.desc ? `<p class="prod-meta" style="margin-top:6px;">${escapeHtml(p.desc)}</p>` : ''}
+      <div id="prodaction-${p.id}" style="margin-top:10px;">
+        <button class="primary" onclick="buyProduct('${p.id}')">pay ${fmt(p.price)} with mobile money</button>
+      </div>
+    </div>
+  `).join('');
+  adminList.innerHTML = products.map(p => `
+    <div class="card" style="margin-bottom:8px;">
+      <p class="prod-name">${escapeHtml(p.name)}</p>
+      <p class="prod-meta">${fmt(p.price)} &middot; ${p.commission}% commission</p>
+      <div class="rowbtn">
+        <button class="small" style="flex:1; color:var(--danger);" onclick="removeProduct('${p.id}')">remove</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+async function saveProducts() {
+  if (db) {
+    try { await db.doc('products/list').set({ items: products }); } catch (e) {}
+  }
+}
+
+async function buyProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const action = document.getElementById('prodaction-' + id);
+  action.innerHTML = '<p class="prod-meta">starting payment...</p>';
+
+  try {
+    const res = await fetch('/api/start-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: id, productName: p.name, price: p.price })
+    });
+    const data = await res.json();
+    window.open(data.redirectUrl, '_blank');
+    action.innerHTML = '<p class="prod-meta">complete payment in the new tab, then tap below</p><button class="primary" onclick="checkPayment(\'' + id + '\', \'' + data.orderId + '\')">check payment status</button>';
+  } catch (e) {
+    action.innerHTML = '<p class="prod-meta" style="color:var(--danger);">could not start payment — try again</p>';
+  }
+}
+
+async function checkPayment(id, orderId) {
+  const p = products.find(x => x.id === id);
+  const action = document.getElementById('prodaction-' + id);
+  action.innerHTML = '<p class="prod-meta">checking with Pesapal...</p>';
+  try {
+    const res = await fetch('/api/order-status/' + orderId);
+    const data = await res.json();
+    if (data.status === 'COMPLETED') {
+      const link = p.link || '#';
+      action.innerHTML = `<a href="${link}" target="_blank" style="text-decoration:none;"><button class="primary">download your product</button></a>`;
+    } else {
+      action.innerHTML = '<p class="prod-meta">not confirmed yet</p><button class="primary" onclick="checkPayment(\'' + id + '\', \'' + orderId + '\')">check again</button>';
+    }
+  } catch (e) {
+    action.innerHTML = '<p class="prod-meta" style="color:var(--danger);">could not check status — try again</p>';
+  }
+}
+
+function addProduct() {
+  const name = document.getElementById('pName').value.trim();
+  const price = document.getElementById('pPrice').value;
+  const commission = document.getElementById('pCommission').value;
+  const desc = document.getElementById('pDesc').value.trim();
+  const link = document.getElementById('pLink').value.trim();
+  const err = document.getElementById('pError');
+  if (!name || !price || !commission) {
+    err.textContent = 'fill in name, price, and commission first';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  products.push({ id: 'p' + Date.now(), name, price: Number(price), commission: Number(commission), desc, link });
+  document.getElementById('pName').value = '';
+  document.getElementById('pPrice').value = '';
+  document.getElementById('pCommission').value = '';
+  document.getElementById('pDesc').value = '';
+  document.getElementById('pLink').value = '';
+  renderProducts();
+  saveProducts();
+}
+
+function removeProduct(id) {
+  products = products.filter(p => p.id !== id);
+  renderProducts();
+  saveProducts();
+}
+
+function renderHome() {
+  document.getElementById('homeBalance').textContent = fmt(balance);
+  document.getElementById('homeReferrals').textContent = referrals;
+  document.getElementById('walletBalance').textContent = fmt(balance);
+}
+
+async function init() {
+  renderHome();
+  renderProducts();
+  try {
+    db = await window.claude?.use?.('db');
+  } catch (e) { db = null; }
+  if (db) {
+    try {
+      const doc = await db.doc('products/list').get();
+      if (doc && doc.items) {
+        products = doc.items;
+        renderProducts();
+      }
+    } catch (e) {}
+  }
+}
+init();
+</script>
+</body>
+</html>
